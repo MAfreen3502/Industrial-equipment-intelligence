@@ -1,0 +1,191 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+New Prediction | Industrial Equipment Intelligence
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-3">RUL Prediction</h2>
+
+    <p class="text-muted">
+        Enter engine operating parameters to estimate Remaining Useful Life.
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form id="predictionForm">
+
+                {% csrf_token %}
+
+                <!-- Engine Selection -->
+                <div class="mb-3">
+
+                    <label for="engine_id" class="form-label">
+                        Select Equipment
+                    </label>
+
+                    <select
+                        name="engine_id"
+                        id="engine_id"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">Choose an engine</option>
+
+                        {% for equipment in equipment_list %}
+
+                        <option value="{{ equipment.engine_id }}">
+                            Engine {{ equipment.engine_id }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <hr class="my-4">
+
+                <!-- ML Feature Inputs -->
+                <h5 class="mb-3">Engine Operating Parameters</h5>
+
+                <div class="row g-3">
+
+                    {% for feature in feature_fields %}
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            {{ feature }}
+                        </label>
+
+                        <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            name="{{ feature }}"
+                            required
+                        >
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <hr class="my-4">
+
+                <button type="submit" class="btn btn-primary">
+                    Predict Remaining Useful Life
+                </button>
+
+                <div id="predictionResult" class="mt-4"></div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+    const predictionForm = document.getElementById('predictionForm');
+
+    predictionForm.addEventListener('submit', async function(event) {
+
+        event.preventDefault();
+
+        const csrfToken = predictionForm.querySelector(
+            '[name=csrfmiddlewaretoken]'
+        ).value;
+
+        const engineId = document.getElementById('engine_id').value;
+
+        const features = {};
+
+        const featureInputs = predictionForm.querySelectorAll(
+            'input[type="number"]'
+        );
+
+        featureInputs.forEach(input => {
+            features[input.name] = parseFloat(input.value);
+        });
+
+        const payload = {
+            engine_id: parseInt(engineId),
+            features: features
+        };
+
+        try {
+
+            const response = await fetch('/api/predictions/', {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            const predictionResult = document.getElementById(
+                'predictionResult'
+            );
+
+            if (response.ok) {
+
+                predictionResult.innerHTML = `
+                    <div class="alert alert-success">
+                        <h5>Prediction Generated Successfully!</h5>
+                        <p><strong>Engine ID:</strong> ${result.engine_id}</p>
+                        <p><strong>Predicted RUL:</strong> ${result.predicted_rul.toFixed(2)} cycles</p>
+                        <p><strong>Prediction ID:</strong> ${result.prediction_id}</p>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+
+            } else {
+
+                predictionResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        ${result.error || 'Prediction failed.'}
+                    </div>
+                `;
+
+            }
+
+        } catch (error) {
+
+            console.error('API Error:', error);
+
+            document.getElementById('predictionResult').innerHTML = `
+                <div class="alert alert-danger">
+                    Something went wrong while connecting to the prediction API.
+                </div>
+            `;
+
+        }
+
+    });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+RUL Chart | Industrial Equipment Intelligence
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-3">RUL Prediction Trends</h2>
+
+    <p class="text-muted">
+        Visualize previously generated Remaining Useful Life predictions.
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div id="rulChart"></div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+
+<script>
+
+    const chartLabels = {{ chart_labels|safe }};
+    const chartValues = {{ chart_values|safe }};
+    const chartDates = {{ chart_dates|safe }};
+
+    const trace = {
+        x: chartLabels,
+        y: chartValues,
+        customdata: chartDates,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Predicted RUL',
+        hovertemplate:
+            'Prediction: %{x}<br>' +
+            'RUL: %{y:.2f} cycles<br>' +
+            'Date: %{customdata}<extra></extra>'
+    };
+
+    const layout = {
+        title: 'Remaining Useful Life Predictions',
+        xaxis: {
+            title: 'Prediction'
+        },
+        yaxis: {
+            title: 'Predicted RUL (Cycles)',
+            rangemode: 'tozero'
+        },
+        margin: {
+            t: 60,
+            r: 30,
+            b: 70,
+            l: 70
+        }
+    };
+
+    Plotly.newPlot('rulChart', [trace], layout, {
+        responsive: true
+    });
+
+</script>
+
+{% endblock %}

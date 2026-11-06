@@ -1,0 +1,78 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Prediction History | Industrial Equipment Intelligence
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-3">Prediction History</h2>
+
+    <p class="text-muted">
+        View previously generated Remaining Useful Life predictions.
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Prediction ID</th>
+                            <th>Engine ID</th>
+                            <th>Predicted RUL</th>
+                            <th>Prediction Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for prediction in prediction_list %}
+
+                        <tr>
+
+                            <td>{{ prediction.id }}</td>
+
+                            <td>
+                                Engine {{ prediction.equipment.engine_id }}
+                            </td>
+
+                            <td>
+                                {{ prediction.predicted_rul|floatformat:2 }}
+                                cycles
+                            </td>
+
+                            <td>
+                                {{ prediction.created_at|date:"d M Y, H:i" }}
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                No predictions available yet.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

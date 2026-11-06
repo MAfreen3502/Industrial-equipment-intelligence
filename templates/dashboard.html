@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}
+Overview | Industrial Equipment Intelligence
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-4">Equipment Health Overview</h2>
+
+    <p class="text-muted">
+        Monitor equipment health and Remaining Useful Life statistics.
+    </p>
+
+    <!-- Dashboard Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Equipment</h6>
+                    <h2 class="fw-bold">{{ total_equipment }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Predictions</h6>
+                    <h2 class="fw-bold">{{ total_predictions }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+
+                    <h6 class="text-muted">Average Predicted RUL</h6>
+
+                    <h2 class="fw-bold">
+                        {% if average_rul is not None %}
+                            {{ average_rul|floatformat:2 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h2>
+
+                    <small class="text-muted">Operating cycles</small>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Registered Equipment -->
+    <h4 class="mb-3">Registered Equipment</h4>
+
+    <div class="row">
+
+        {% for equipment in equipment_list %}
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Engine {{ equipment.engine_id }}
+                    </h5>
+
+                    <p>
+                        <strong>Type:</strong>
+                        {{ equipment.equipment_type }}
+                    </p>
+
+                    <p>
+                        <strong>Dataset:</strong>
+                        {{ equipment.dataset }}
+                    </p>
+
+                    <p>
+                        <strong>Created:</strong>
+                        {{ equipment.created_at|date:"d M Y" }}
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+        {% empty %}
+
+        <p class="text-muted">No equipment registered yet.</p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
